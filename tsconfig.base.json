@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "jsx": "react",
+        "moduleResolution": "node",
+        "strict": true,
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "downlevelIteration": true,
+        "isolatedModules": true
+    }
+}

@@ -10,7 +10,7 @@ module.exports = env => {
         mode: "development",
         entry: path.resolve(srcDir, "index.ts"),
         output: {
-            library:       "@bzrr/use-classes",
+            library:       "@bzrr/useclasses",
             libraryTarget: "umd",
             filename:      "index.js",
             publicPath:    "/",

@@ -1,11 +1,15 @@
 {
     "name": "@bzrr/useclasses",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A simple library for handling css classes in React",
     "author": "João Bezerra",
     "license": "MIT",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/joaobzrr/useclasses"
+    },
     "scripts": {
         "build": "webpack",
         "test": "jest"

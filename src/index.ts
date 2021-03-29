@@ -1,1 +1,1 @@
-export { default } from "./useClasses";
+export { fromSchema, useClasses, serializeClasses } from "./useClasses";

@@ -5,7 +5,7 @@ import * as types from "./types";
 export function fromSchema(schema: types.Schema) {
     const spec = new Spec(schema);
 
-    function useClasses(...classesToEnable: string[]) {
+    return (...classesToEnable: string[]) => {
         spec.validate(...classesToEnable);
 
         const [classes, setState] = useState(() => {
@@ -39,21 +39,10 @@ export function fromSchema(schema: types.Schema) {
 
         return { classes, setClasses };
     }
-
-    function serializeClasses(state: Set<string>) {
-        const sorted = [...state].sort((a: string, b: string) => {
-            const pa = spec.classToPrecedence.get(a)!;
-            const pb = spec.classToPrecedence.get(b)!;
-            return pa - pb;
-        });
-        return sorted.join(" ");
-    }
-
-    return { useClasses, serializeClasses };
 }
 
-export function useClasses(...classesToEnable: string[]) {
-    const [classes, setState] = useState(() => new Set(classesToEnable));
+export function useClasses(...initialState: string[]) {
+    const [classes, setState] = useState(() => new Set(initialState));
 
     function setClasses(...args: types.SetClassesFunctionArgument[]): void;
     function setClasses(args: types.UpdateFunction): void;

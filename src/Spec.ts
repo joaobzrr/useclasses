@@ -1,18 +1,15 @@
 import * as types from "./types";
 
 export default class Spec {
-    validClasses:      Set<string>;
-    defaultClasses:    Set<string>;
-
-    classToGroup:      Map<string, types.GroupSpecifier>;
-    classToPrecedence: Map<string, number>;
-    groupToClasses:    Map<types.GroupSpecifier, Set<string>>;
+    validClasses:   Set<string>;
+    defaultClasses: Set<string>;
+    classToGroup:   Map<string, types.GroupSpecifier>;
+    groupToClasses: Map<types.GroupSpecifier, Set<string>>;
 
     constructor(schema: types.Schema) {
         this.validClasses      = new Set();
         this.defaultClasses    = new Set();
         this.classToGroup      = new Map();
-        this.classToPrecedence = new Map();
 
         for (const [index, entry] of schema.entries()) {
             this.validClasses.add(entry.name);
@@ -22,7 +19,6 @@ export default class Spec {
             }
 
             this.classToGroup.set(entry.name, entry.group);
-            this.classToPrecedence.set(entry.name, index);
         }
 
         this.groupToClasses = this.mapGroupToClasses(this.validClasses);

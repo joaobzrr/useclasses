@@ -11,15 +11,15 @@ const schema = [
 ];
 
 describe("with schema", () => {
+    const useClasses = fromSchema(schema);
+
     test("default classes", () => {
-        const { useClasses, serializeClasses } = fromSchema(schema);
         const { result } = renderHook(() => useClasses());
 
         expect(result.current.classes).toEqual(new Set(["a", "b"]));
     });
 
     test("update state", () => {
-        const { useClasses, serializeClasses } = fromSchema(schema);
         const { result } = renderHook(() => useClasses());
 
         act(() => result.current.setClasses("c"));
@@ -30,7 +30,6 @@ describe("with schema", () => {
     });
 
     test("mutually exclusive groups", () => {
-        const { useClasses, serializeClasses } = fromSchema(schema);
         const { result } = renderHook(() => useClasses("d"));
 
         expect(result.current.classes).toEqual(new Set(["a", "b", "d"]));
@@ -41,7 +40,6 @@ describe("with schema", () => {
     });
 
     test("classes in the null group are not mutually exclusive", () => {
-        const { useClasses, serializeClasses } = fromSchema(schema);
         const { result } = renderHook(() => useClasses());
 
         act(() => result.current.setClasses("c"));
@@ -52,7 +50,6 @@ describe("with schema", () => {
     });
 
     test("setClasses accepts a function which takes the current state", () => {
-        const { useClasses, serializeClasses } = fromSchema(schema);
         const { result } = renderHook(() => useClasses());
 
         let state;
@@ -65,7 +62,6 @@ describe("with schema", () => {
     });
 
     test("setClasses accepts a function which updates the state", () => {
-        const { useClasses, serializeClasses } = fromSchema(schema);
         const { result } = renderHook(() => useClasses());
 
         act(() => result.current.setClasses(() => "c"));
@@ -73,14 +69,12 @@ describe("with schema", () => {
     });
 
     test("forbid classes not specified in the schema to be set on init", () => {
-        const { useClasses, serializeClasses } = fromSchema(schema);
         const { result } = renderHook(() => useClasses("z"));
 
         expect(result.error).toBeDefined();
     });
 
     test("forbid classes not specified in the schema to be set on update", () => {
-        const { useClasses, serializeClasses } = fromSchema(schema);
         const { result } = renderHook(() => useClasses());
 
         act(() => result.current.setClasses("z"));
@@ -88,10 +82,8 @@ describe("with schema", () => {
     });
 
     test("state serialization", () => {
-        const { useClasses, serializeClasses } = fromSchema(schema);
         const { result } = renderHook(() => useClasses("c", "e"));
-
-        expect(serializeClasses(result.current.classes)).toEqual("a b c e");
+        expect(serializeClasses(result.current.classes).split(" ").sort()).toEqual(["a", "b", "c", "e"]);
     });
 });
 
@@ -128,6 +120,6 @@ describe("without schema", () => {
     test("state serialization", () => {
         const { result } = renderHook(() => useClasses("a", "b"));
 
-        expect(serializeClasses(result.current.classes)).toEqual("a b");
+        expect(serializeClasses(result.current.classes).split(" ").sort()).toEqual(["a", "b"]);
     });
 });

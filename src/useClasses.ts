@@ -1,7 +1,9 @@
 import { useState } from "react";
 import Spec from "./Spec";
+import { union, difference, isFunction, isString } from "./utils";
 import * as types from "./types";
 
+// @Todo: Make it possible to disable all classes at once easily.
 export function fromSchema(schema: types.Schema) {
     const spec = new Spec(schema);
 
@@ -27,8 +29,8 @@ export function fromSchema(schema: types.Schema) {
                     if (group === "default" || group === null) {
                         continue;
                     }
-                    const a = new Set(spec.groupToClasses.get(group));
-                    const b = new Set(classes);
+                    const a = new Set<string>(spec.groupToClasses.get(group));
+                    const b = new Set<string>(classes);
                     exclude = union(exclude, difference(a, b));
                 }
                 classesToDisable = union(classesToDisable, exclude);
@@ -91,20 +93,4 @@ function handleSetClassesArguments(currentState: Set<string>, args: any): types.
     } else {
         return args;
     }
-}
-
-function union<T>(a: Set<T>, b: Set<T>): Set<T> {
-    return new Set<T>([...a, ...b]);
-}
-
-function difference<T>(a: Set<T>, b: Set<T>): Set<T> {
-    return new Set<T>([...a].filter((k: T) => !b.has(k)));
-}
-
-function isFunction (obj: any) {
-    return obj && Object.prototype.toString.call(obj) === '[object Function]';
-}
-
-function isString(obj: any) {
-    return Object.prototype.toString.call(obj) === "[object String]";
 }

@@ -1,6 +1,4 @@
-export type Schema = SchemaEntry[];
-
-export type SchemaEntry = {name: string, group: GroupSpecifier};
+export type Schema = {[key: string]: GroupSpecifier};
 
 export type GroupSpecifier = number | string | null;
 

@@ -1,14 +1,14 @@
 import { renderHook, act } from "@testing-library/react-hooks";
 import { fromSchema, useClasses, serializeClasses } from "./useClasses";
 
-const schema = [
-    {name: "a", group: "default"},
-    {name: "b", group: "default"},
-    {name: "c", group: null},
-    {name: "d", group: 1},
-    {name: "e", group: 1},
-    {name: "f", group: null}
-];
+const schema = {
+    a: "default",
+    b: "default",
+    c: null,
+    d: 1,
+    e: 1,
+    f: null
+};
 
 describe("with schema", () => {
     const useClasses = fromSchema(schema);
@@ -19,14 +19,36 @@ describe("with schema", () => {
         expect(result.current.classes).toEqual(new Set(["a", "b"]));
     });
 
-    test("update state", () => {
+    test("update state directly", () => {
         const { result } = renderHook(() => useClasses());
 
         act(() => result.current.setClasses("c"));
         expect(result.current.classes).toEqual(new Set(["a", "b", "c"]));
 
-        act(() => result.current.setClasses({b: false}));
-        expect(result.current.classes).toEqual(new Set(["a", "c"]));
+        act(() => result.current.setClasses({a: false, b: false}));
+        expect(result.current.classes).toEqual(new Set(["c"]));
+
+        act(() => result.current.setClasses(new Set(["e"])));
+        expect(result.current.classes).toEqual(new Set(["c", "e"]))
+
+        act(() => result.current.setClasses(["b", "f"]));
+        expect(result.current.classes).toEqual(new Set(["b", "c", "e", "f"]))
+    });
+
+    test("update state with update function", () => {
+        const { result } = renderHook(() => useClasses());
+
+        act(() => result.current.setClasses((s: Set<string>) => "c"));
+        expect(result.current.classes).toEqual(new Set(["a", "b", "c"]));
+
+        act(() => result.current.setClasses((s: Set<string>) => { return {a: false, b: false} }));
+        expect(result.current.classes).toEqual(new Set(["c"]));
+
+        act(() => result.current.setClasses((s: Set<string>) => new Set(["e"])));
+        expect(result.current.classes).toEqual(new Set(["c", "e"]))
+
+        act(() => result.current.setClasses((s: Set<string>) => ["b", "f"]));
+        expect(result.current.classes).toEqual(new Set(["b", "c", "e", "f"]))
     });
 
     test("mutually exclusive groups", () => {
@@ -88,14 +110,36 @@ describe("with schema", () => {
 });
 
 describe("without schema", () => {
-    test("update state", () => {
+    test("update state directly", () => {
         const { result } = renderHook(() => useClasses("a", "b"));
 
         act(() => result.current.setClasses("c"));
         expect(result.current.classes).toEqual(new Set(["a", "b", "c"]));
 
-        act(() => result.current.setClasses({b: false}));
-        expect(result.current.classes).toEqual(new Set(["a", "c"]));
+        act(() => result.current.setClasses({a: false, b: false}));
+        expect(result.current.classes).toEqual(new Set(["c"]));
+
+        act(() => result.current.setClasses(new Set(["e"])));
+        expect(result.current.classes).toEqual(new Set(["c", "e"]))
+
+        act(() => result.current.setClasses(["b", "f"]));
+        expect(result.current.classes).toEqual(new Set(["b", "c", "e", "f"]))
+    });
+
+    test("update state with update function", () => {
+        const { result } = renderHook(() => useClasses("a", "b"));
+
+        act(() => result.current.setClasses((s: Set<string>) => "c"));
+        expect(result.current.classes).toEqual(new Set(["a", "b", "c"]));
+
+        act(() => result.current.setClasses((s: Set<string>) => { return {a: false, b: false} }));
+        expect(result.current.classes).toEqual(new Set(["c"]));
+
+        act(() => result.current.setClasses((s: Set<string>) => new Set(["e"])));
+        expect(result.current.classes).toEqual(new Set(["c", "e"]))
+
+        act(() => result.current.setClasses((s: Set<string>) => ["b", "f"]));
+        expect(result.current.classes).toEqual(new Set(["b", "c", "e", "f"]))
     });
 
     test("setClasses accepts a function which takes the current state", () => {

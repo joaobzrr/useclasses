@@ -1,6 +1,6 @@
 {
     "name": "@bzrr/useclasses",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "A simple library for handling css classes in React",
     "author": "João Bezerra",
     "license": "MIT",

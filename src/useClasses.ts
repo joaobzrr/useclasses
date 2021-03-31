@@ -6,11 +6,11 @@ import * as types from "./types";
 export function fromSchema(schema: types.Schema) {
     const spec = new Spec(schema);
 
-    return (...classesToEnable: string[]) => {
-        spec.validate(...classesToEnable);
+    return (...initialState: string[]) => {
+        spec.validate(...initialState);
 
         const [classes, setState] = useState(() => {
-            return union(new Set(classesToEnable), spec.defaultClasses);
+            return union(new Set(initialState), spec.defaultClasses);
         });
 
         function setClasses(...args: types.SetClassesFunctionArgument[]): void;
@@ -27,13 +27,13 @@ export function fromSchema(schema: types.Schema) {
                     _args = args;
                 }
 
-                let [classesToEnable, classesToDisable] = getDiff(currentState, _args);
+                let [enable, disable] = getDiff(currentState, _args);
 
-                spec.validate(...classesToEnable);
-                spec.validate(...classesToDisable);
+                spec.validate(...enable);
+                spec.validate(...disable);
 
                 let exclude = new Set<string>();
-                for (let [group, classes] of spec.mapGroupToClasses(classesToEnable)) {
+                for (let [group, classes] of spec.mapGroupToClasses(enable)) {
                     if (group === "default" || group === null) {
                         continue;
                     }
@@ -41,9 +41,9 @@ export function fromSchema(schema: types.Schema) {
                     const b = new Set<string>(classes);
                     exclude = union(exclude, difference(a, b));
                 }
-                classesToDisable = union(classesToDisable, exclude);
+                disable = union(disable, exclude);
 
-                return difference(union(currentState, classesToEnable), classesToDisable);
+                return difference(union(currentState, enable), disable);
             });
         }
 
@@ -68,8 +68,8 @@ export function useClasses(...initialState: string[]) {
                 _args = args;
             }
 
-            const [classesToEnable, classesToDisable] = getDiff(currentState, _args);
-            return difference(union(currentState, classesToEnable), classesToDisable);
+            const [enable, disable] = getDiff(currentState, _args);
+            return difference(union(currentState, enable), disable);
         });
     }
 
@@ -81,33 +81,23 @@ export function serializeClasses(state: Set<string>) {
 }
 
 function getDiff(currentState: Set<string>, args: types.SetClassesFunctionArgument[]) {
-    let classesToEnable  = new Set<string>();
-    let classesToDisable = new Set<string>();
+    let enable  = new Set<string>();
+    let disable = new Set<string>();
 
     for (const argument of args) {
         if (isString(argument)) {
-            classesToEnable.add(argument as string);
+            enable.add(argument as string);
         } else if (Array.isArray(argument)) {
-            classesToEnable = new Set([...classesToEnable, ...<string[]>argument]);
+            enable = new Set([...enable, ...<string[]>argument]);
         } else if (argument instanceof Set) {
-            classesToEnable = new Set([...classesToEnable, ...<Set<string>>argument]);
+            enable = new Set([...enable, ...<Set<string>>argument]);
         } else {
             const dict = argument as {[key: string]: boolean};
             for (let key of Object.keys(dict)) {
-                (dict[key] ? classesToEnable : classesToDisable).add(key);
+                (dict[key] ? enable : disable).add(key);
             }
         }
     }
 
-    return [classesToEnable, classesToDisable];
-}
-
-function handleSetClassesArguments(currentState: Set<string>, args: types.SetClassesFunctionArgument[]): types.SetClassesFunctionArgument[];
-function handleSetClassesArguments(currentState: Set<string>, args: types.UpdateFunction): types.SetClassesFunctionArgument[];
-function handleSetClassesArguments(currentState: Set<string>, args: any): types.SetClassesFunctionArgument[] {
-    if (isFunction(args[0])) {
-        return [(args[0] as types.UpdateFunction)(currentState)]
-    } else {
-        return args;
-    }
+    return [enable, disable];
 }

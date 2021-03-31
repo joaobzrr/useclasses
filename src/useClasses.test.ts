@@ -51,6 +51,13 @@ describe("with schema", () => {
         expect(result.current.classes).toEqual(new Set(["b", "c", "e", "f"]))
     });
 
+    test("disable all classes at once", () => {
+        const { result } = renderHook(() => useClasses());
+
+        act(() => result.current.setClasses(null));
+        expect(result.current.classes).toEqual(new Set());
+    });
+
     test("mutually exclusive groups", () => {
         const { result } = renderHook(() => useClasses("d"));
 
@@ -140,6 +147,13 @@ describe("without schema", () => {
 
         act(() => result.current.setClasses((s: Set<string>) => ["b", "f"]));
         expect(result.current.classes).toEqual(new Set(["b", "c", "e", "f"]))
+    });
+
+    test("disable all classes at once", () => {
+        const { result } = renderHook(() => useClasses("a", "b"));
+
+        act(() => result.current.setClasses(null));
+        expect(result.current.classes).toEqual(new Set());
     });
 
     test("setClasses accepts a function which takes the current state", () => {

@@ -3,7 +3,6 @@ import Spec from "./Spec";
 import { union, difference, isFunction, isString } from "./utils";
 import * as types from "./types";
 
-// @Todo: Make it possible to disable all classes at once easily.
 export function fromSchema(schema: types.Schema) {
     const spec = new Spec(schema);
 
@@ -16,10 +15,19 @@ export function fromSchema(schema: types.Schema) {
 
         function setClasses(...args: types.SetClassesFunctionArgument[]): void;
         function setClasses(args: types.UpdateFunction): void;
+        function setClasses(args: null): void;
         function setClasses(...args: any): void {
             setState((currentState: Set<string>) => {
-                const normalized = handleSetClassesArguments(currentState, args);
-                let [classesToEnable, classesToDisable] = getDiffFromArguments(currentState, normalized);
+                if (args[0] === null) return new Set();
+
+                let _args: types.SetClassesFunctionArgument[];
+                if (isFunction(args[0])) {
+                    _args = [ (<types.UpdateFunction>args[0])(currentState) ];
+                } else {
+                    _args = args;
+                }
+
+                let [classesToEnable, classesToDisable] = getDiff(currentState, _args);
 
                 spec.validate(...classesToEnable);
                 spec.validate(...classesToDisable);
@@ -48,10 +56,19 @@ export function useClasses(...initialState: string[]) {
 
     function setClasses(...args: types.SetClassesFunctionArgument[]): void;
     function setClasses(args: types.UpdateFunction): void;
+    function setClasses(args: null): void;
     function setClasses(...args: any): void {
         setState((currentState: Set<string>) => {
-            const normalized = handleSetClassesArguments(currentState, args);
-            const [classesToEnable, classesToDisable] = getDiffFromArguments(currentState, normalized);
+            if (args[0] === null) return new Set();
+
+            let _args: types.SetClassesFunctionArgument[];
+            if (isFunction(args[0])) {
+                _args = [ (<types.UpdateFunction>args[0])(currentState) ];
+            } else {
+                _args = args;
+            }
+
+            const [classesToEnable, classesToDisable] = getDiff(currentState, _args);
             return difference(union(currentState, classesToEnable), classesToDisable);
         });
     }
@@ -63,7 +80,7 @@ export function serializeClasses(state: Set<string>) {
     return [...state].join(" ");
 }
 
-function getDiffFromArguments(currentState: Set<string>, args: types.SetClassesFunctionArgument[]) {
+function getDiff(currentState: Set<string>, args: types.SetClassesFunctionArgument[]) {
     let classesToEnable  = new Set<string>();
     let classesToDisable = new Set<string>();
 
